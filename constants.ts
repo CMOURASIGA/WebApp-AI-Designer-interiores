@@ -1,38 +1,38 @@
 export const INTERIOR_STYLES = [
   'Mid-Century Modern',
-  'Scandinavian',
-  'Bohemian',
+  'Escandinavo',
+  'Boho/Boêmio',
   'Industrial',
-  'Minimalist',
-  'Coastal',
+  'Minimalista',
+  'Litorâneo',
   'Japandi',
   'Art Deco',
   'Farmhouse',
-  'Contemporary',
-  'Rustic',
-  'Transitional'
+  'Contemporâneo',
+  'Rústico',
+  'Transicional'
 ];
 
 export const ROOM_TYPES = [
-  'Living Room',
-  'Bedroom',
-  'Kitchen',
-  'Dining Room',
-  'Home Office',
-  'Bathroom',
-  'Balcony'
+  'Sala de Estar',
+  'Quarto',
+  'Cozinha',
+  'Sala de Jantar',
+  'Escritório',
+  'Banheiro',
+  'Varanda'
 ];
 
-export const BUDGET_OPTIONS = ['Low', 'Medium', 'High'];
+export const BUDGET_OPTIONS = ['Baixo', 'Médio', 'Alto'];
 
-export const BOLDNESS_OPTIONS = ['Discreet', 'Balanced', 'Bold'];
+export const BOLDNESS_OPTIONS = ['Discreto', 'Equilibrado', 'Ousado'];
 
 export const SAMPLE_IMAGES = [
-  { label: 'Living Room', url: 'https://picsum.photos/id/10/800/600' },
-  { label: 'Bedroom', url: 'https://picsum.photos/id/20/800/600' },
-  { label: 'Kitchen', url: 'https://picsum.photos/id/30/800/600' },
+  { label: 'Sala de Estar', url: 'https://picsum.photos/id/10/800/600' },
+  { label: 'Quarto', url: 'https://picsum.photos/id/20/800/600' },
+  { label: 'Cozinha', url: 'https://picsum.photos/id/30/800/600' },
 ];
 
 export const COLOR_PALETTES = [
-  'Neutral', 'Warm Earth', 'Cool Blues', 'Monochrome', 'Pastel', 'Vibrant'
+  'Neutro', 'Tons Terrosos', 'Azuis Frios', 'Monocromático', 'Pastel', 'Vibrante'
 ];

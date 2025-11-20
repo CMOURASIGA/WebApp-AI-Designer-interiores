@@ -36,7 +36,7 @@ const Studio: React.FC = () => {
         payload: {
           id: Date.now().toString(),
           role: 'assistant',
-          content: `I've generated a new proposal based on the ${state.style} style! I focused on a ${state.params.budget.toLowerCase()} budget approach. Check the suggestions panel.`,
+          content: `Gerei uma nova proposta baseada no estilo ${state.style}! Foquei em uma abordagem com orçamento ${state.params.budget.toLowerCase()}. Confira as sugestões.`,
           timestamp: Date.now()
         }
       });
@@ -87,12 +87,12 @@ const Studio: React.FC = () => {
                        {state.isGenerating ? (
                          <>
                            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                           Dreaming...
+                           Criando...
                          </>
                        ) : (
                          <>
                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                           Generate Proposal
+                           Gerar Proposta
                          </>
                        )}
                      </button>
@@ -109,7 +109,7 @@ const Studio: React.FC = () => {
                 <div className="glass-panel p-5 rounded-2xl border border-white/5">
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                    Project Parameters
+                    Parâmetros do Projeto
                   </h3>
                   <ProjectControls />
                   
@@ -120,7 +120,7 @@ const Studio: React.FC = () => {
                         disabled={state.isGenerating}
                         className="w-full mt-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors"
                      >
-                        {state.isGenerating ? 'Updating...' : 'Update Proposal'}
+                        {state.isGenerating ? 'Atualizando...' : 'Atualizar Proposta'}
                      </button>
                   )}
                 </div>
@@ -129,14 +129,14 @@ const Studio: React.FC = () => {
               {/* Suggestions Panel */}
               <div className="md:col-span-7 lg:col-span-8">
                  <div className="space-y-4">
-                    <h3 className="text-white font-semibold pl-1">Design Suggestions</h3>
+                    <h3 className="text-white font-semibold pl-1">Sugestões de Design</h3>
                     {state.suggestions.length > 0 ? (
                       <div className="grid grid-cols-1 gap-4">
                         {state.suggestions.map(s => <SuggestionCard key={s.id} suggestion={s} />)}
                       </div>
                     ) : (
                       <div className="border border-dashed border-slate-700 rounded-2xl p-8 text-center">
-                        <p className="text-slate-500">Click "Generate Proposal" to see AI recommendations.</p>
+                        <p className="text-slate-500">Clique em "Gerar Proposta" para ver as recomendações da IA.</p>
                       </div>
                     )}
                  </div>

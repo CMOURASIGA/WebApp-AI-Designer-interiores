@@ -16,9 +16,9 @@ export interface Suggestion {
 export interface ProjectParams {
   roomType: string;
   area: number;
-  budget: 'Low' | 'Medium' | 'High';
+  budget: 'Baixo' | 'Médio' | 'Alto';
   colors: string[];
-  boldness: 'Discreet' | 'Balanced' | 'Bold';
+  boldness: 'Discreto' | 'Equilibrado' | 'Ousado';
 }
 
 export interface DesignState {

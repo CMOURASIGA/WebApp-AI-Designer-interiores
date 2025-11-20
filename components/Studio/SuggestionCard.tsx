@@ -22,7 +22,7 @@ export const SuggestionCard: React.FC<SuggestionCardProps> = ({ suggestion }) =>
         {suggestion.description}
       </p>
       <div className="bg-black/20 rounded-lg p-3">
-        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Key Elements</p>
+        <p className="text-xs text-slate-500 uppercase font-bold mb-2">Elementos Chave</p>
         <ul className="text-sm text-slate-200 space-y-1">
           {suggestion.items.map((item, i) => (
             <li key={i} className="flex items-center gap-2">

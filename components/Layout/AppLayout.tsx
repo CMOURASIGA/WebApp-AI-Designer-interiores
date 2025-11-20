@@ -28,11 +28,11 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <nav className="flex items-center gap-6">
              {location.pathname === '/studio' && (
                <Link to="/presentation" className="hidden sm:inline-flex text-sm font-medium text-slate-400 hover:text-white transition-colors">
-                 View Presentation
+                 Ver Apresentação
                </Link>
              )}
              <div className="w-8 h-8 rounded-full bg-slate-800 border border-slate-700 flex items-center justify-center text-xs font-bold text-slate-400">
-               JD
+               VC
              </div>
           </nav>
         </div>
@@ -44,7 +44,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       <footer className="border-t border-white/5 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>© 2024 AI Interior Design Consultant. Mock Prototype.</p>
+          <p>© 2024 Consultor de Design de Interiores IA. Protótipo Mock.</p>
         </div>
       </footer>
     </div>

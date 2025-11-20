@@ -36,7 +36,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onImageSelect,
     if (file.type.startsWith('image/')) {
       onImageSelect(file);
     } else {
-      alert('Please upload an image file.');
+      alert('Por favor, envie um arquivo de imagem.');
     }
   };
 
@@ -66,7 +66,7 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onImageSelect,
         <div className="w-full h-full relative">
           <img src={previewUrl} alt="Preview" className="w-full h-full object-cover" />
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-            <p className="text-white font-medium">Change Image</p>
+            <p className="text-white font-medium">Alterar Imagem</p>
           </div>
         </div>
       ) : (
@@ -76,9 +76,9 @@ export const ImageUploadArea: React.FC<ImageUploadAreaProps> = ({ onImageSelect,
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
             </svg>
           </div>
-          <h3 className="text-lg font-semibold text-white">Upload Space Photo</h3>
-          <p className="text-sm text-slate-400 mt-1">Drag & drop or click to browse</p>
-          <p className="text-xs text-slate-500 mt-4">Supports JPG, PNG (Max 10MB)</p>
+          <h3 className="text-lg font-semibold text-white">Enviar Foto do Ambiente</h3>
+          <p className="text-sm text-slate-400 mt-1">Arraste e solte ou clique para buscar</p>
+          <p className="text-xs text-slate-500 mt-4">Suporta JPG, PNG (Max 10MB)</p>
         </div>
       )}
     </div>

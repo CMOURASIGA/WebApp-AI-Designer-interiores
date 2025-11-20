@@ -13,7 +13,7 @@ export const ProjectControls: React.FC = () => {
     <div className="space-y-6 p-1">
       <div className="grid grid-cols-2 gap-4">
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Room Type</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Ambiente</label>
           <select
             value={state.params.roomType}
             onChange={(e) => handleParamChange('roomType', e.target.value)}
@@ -23,7 +23,7 @@ export const ProjectControls: React.FC = () => {
           </select>
         </div>
         <div>
-          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Area (m²)</label>
+          <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Área (m²)</label>
           <input
             type="number"
             value={state.params.area}
@@ -34,7 +34,7 @@ export const ProjectControls: React.FC = () => {
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Budget</label>
+        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Orçamento</label>
         <div className="flex bg-slate-800 rounded-lg p-1 border border-slate-700">
           {BUDGET_OPTIONS.map(opt => (
             <button
@@ -51,7 +51,7 @@ export const ProjectControls: React.FC = () => {
       </div>
 
       <div>
-         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Style Boldness</label>
+         <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Nível de Ousadia</label>
          <input 
            type="range" 
            min="0" 
@@ -62,14 +62,14 @@ export const ProjectControls: React.FC = () => {
            className="w-full h-2 bg-slate-800 rounded-lg appearance-none cursor-pointer accent-indigo-500"
          />
          <div className="flex justify-between text-xs text-slate-400 mt-1">
-            <span>Discreet</span>
-            <span>Balanced</span>
-            <span>Bold</span>
+            <span>Discreto</span>
+            <span>Equilibrado</span>
+            <span>Ousado</span>
          </div>
       </div>
 
       <div>
-        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Preferred Palette</label>
+        <label className="block text-xs font-bold text-slate-500 uppercase mb-2">Paleta de Cores</label>
         <div className="flex flex-wrap gap-2">
           {COLOR_PALETTES.map(color => (
             <button

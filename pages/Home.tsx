@@ -23,7 +23,7 @@ const Home: React.FC = () => {
     if (state.originalImage) {
       navigate('/studio');
     } else {
-      alert("Please upload or select an image first.");
+      alert("Por favor, envie ou selecione uma imagem primeiro.");
     }
   };
 
@@ -36,16 +36,16 @@ const Home: React.FC = () => {
           <div className="space-y-2">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-wider uppercase">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-              AI-Powered Design
+              Design com IA
             </div>
             <h1 className="text-4xl md:text-6xl font-display font-bold text-white leading-tight">
-              Visualize your space in <br/>
+              Visualize seu espaço em <br/>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-                any style instantly.
+                qualquer estilo instantaneamente.
               </span>
             </h1>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Upload a photo, choose a vibe, and let our AI consultant draft the perfect interior design proposal for you.
+              Envie uma foto, escolha um estilo e deixe nossa consultora IA criar o projeto de interiores perfeito para você.
             </p>
           </div>
 
@@ -54,7 +54,7 @@ const Home: React.FC = () => {
               
               {/* Style Selector */}
               <div className="text-left">
-                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">1. Choose a Style</label>
+                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">1. Escolha um Estilo</label>
                 <StyleChipsBar 
                   selectedStyle={state.style} 
                   onSelect={(style) => dispatch({ type: 'SET_STYLE', payload: style })} 
@@ -64,7 +64,7 @@ const Home: React.FC = () => {
 
               {/* Upload Area */}
               <div className="text-left">
-                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">2. Upload Room Photo</label>
+                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">2. Envie uma Foto do Ambiente</label>
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                   <div className="md:col-span-2">
                     <ImageUploadArea 
@@ -73,7 +73,7 @@ const Home: React.FC = () => {
                     />
                   </div>
                   <div className="space-y-3">
-                    <p className="text-xs text-slate-500 font-medium uppercase">Or try a sample</p>
+                    <p className="text-xs text-slate-500 font-medium uppercase">Ou tente um exemplo</p>
                     <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
                       {SAMPLE_IMAGES.map((sample) => (
                         <button 
@@ -103,7 +103,7 @@ const Home: React.FC = () => {
                     }
                   `}
                 >
-                  Enter Design Studio →
+                  Entrar no Estúdio →
                 </button>
               </div>
 

@@ -6,14 +6,18 @@ export const chatService = {
   sendMessage: async (history: Message[], userMessage: string, context: { style: string; params: ProjectParams }): Promise<Message> => {
     await delay(1500); // Simulate thinking
 
-    let responseContent = `I've analyzed your request for a ${context.params.roomType} in ${context.style} style. `;
+    let responseContent = `Analisei seu pedido para ${context.params.roomType} no estilo ${context.style}. `;
 
-    if (userMessage.toLowerCase().includes('suggestion') || userMessage.toLowerCase().includes('idea')) {
-      responseContent += `Considering your ${context.params.budget.toLowerCase()} budget, I recommend focusing on key furniture pieces that define the aesthetic without cluttering the ${context.params.area}m² space. How does that sound?`;
-    } else if (userMessage.toLowerCase().includes('color')) {
-      responseContent += `For ${context.style}, we usually lean towards ${context.params.colors.join(', ')} tones. I can generate a new palette if you'd like more contrast.`;
+    const msgLower = userMessage.toLowerCase();
+
+    if (msgLower.includes('sugestão') || msgLower.includes('ideia') || msgLower.includes('dica')) {
+      responseContent += `Considerando seu orçamento ${context.params.budget.toLowerCase()}, recomendo focar em peças-chave de mobiliário que definam a estética sem sobrecarregar o espaço de ${context.params.area}m². O que acha?`;
+    } else if (msgLower.includes('cor') || msgLower.includes('paleta')) {
+      responseContent += `Para o estilo ${context.style}, geralmente tendemos para tons de ${context.params.colors.join(', ')}. Posso gerar uma nova paleta se quiser mais contraste.`;
+    } else if (msgLower.includes('iluminação') || msgLower.includes('luz')) {
+      responseContent += `A iluminação é crucial no estilo ${context.style}. Tente usar luzes indiretas ou quentes (2700K) para criar acolhimento.`;
     } else {
-      responseContent += "I can help you refine the materials, lighting, or furniture layout. What would you like to focus on next?";
+      responseContent += "Posso ajudar a refinar os materiais, a iluminação ou a disposição dos móveis. O que gostaria de focar agora?";
     }
 
     return {
@@ -32,24 +36,24 @@ export const designService = {
     return [
       {
         id: '1',
-        title: 'Key Furniture Selection',
-        description: `Curated pieces to match the ${style} aesthetic while maximizing flow in a ${params.area}m² area.`,
-        items: ['Velvet Accent Chair', 'Geometric Rug', 'Brass Floor Lamp'],
-        tags: ['Furniture', 'Layout']
+        title: 'Seleção de Mobiliário Chave',
+        description: `Peças curadas para combinar com a estética ${style} enquanto maximizam o fluxo na área de ${params.area}m².`,
+        items: ['Poltrona de Acento', 'Tapete Geométrico', 'Luminária de Piso'],
+        tags: ['Mobiliário', 'Layout']
       },
       {
         id: '2',
-        title: 'Lighting & Ambiance',
-        description: 'Layered lighting approach to enhance mood and functionality.',
-        items: ['Pendant Light', 'Warm White Bulbs (2700K)', 'Dimmer Switches'],
-        tags: ['Lighting', 'Mood']
+        title: 'Iluminação e Ambiente',
+        description: 'Abordagem de iluminação em camadas para melhorar o humor e a funcionalidade.',
+        items: ['Luminária Pendente', 'Lâmpadas Quentes (2700K)', 'Dimmers'],
+        tags: ['Iluminação', 'Mood']
       },
       {
         id: '3',
-        title: 'Material Palette',
-        description: `Textures that bring the ${params.boldness} character to life.`,
-        items: ['Natural Oak', 'Matte Black Metal', 'Linen Textiles'],
-        tags: ['Materials', 'Textures']
+        title: 'Paleta de Materiais',
+        description: `Texturas que trazem o caráter ${params.boldness.toLowerCase()} à vida.`,
+        items: ['Carvalho Natural', 'Metal Preto Fosco', 'Tecidos de Linho'],
+        tags: ['Materiais', 'Texturas']
       }
     ];
   }

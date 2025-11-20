@@ -3,11 +3,11 @@ import { DesignState, DesignAction, ProjectParams } from '../types';
 import { INTERIOR_STYLES } from '../constants';
 
 const initialParams: ProjectParams = {
-  roomType: 'Living Room',
+  roomType: 'Sala de Estar',
   area: 25,
-  budget: 'Medium',
-  colors: ['Neutral'],
-  boldness: 'Balanced'
+  budget: 'Médio',
+  colors: ['Neutro'],
+  boldness: 'Equilibrado'
 };
 
 const initialState: DesignState = {
@@ -20,7 +20,7 @@ const initialState: DesignState = {
     {
       id: 'init',
       role: 'assistant',
-      content: 'Hello! Upload a photo and choose a style to get started. I am here to help you visualize your dream space.',
+      content: 'Olá! Envie uma foto e escolha um estilo para começar. Estou aqui para ajudar você a visualizar o espaço dos seus sonhos.',
       timestamp: Date.now()
     }
   ],

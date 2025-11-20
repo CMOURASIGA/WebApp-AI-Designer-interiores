@@ -54,7 +54,7 @@ export const ChatPanel: React.FC = () => {
       {/* Chat Header */}
       <div className="p-4 border-b border-white/5 bg-white/5 backdrop-blur flex justify-between items-center">
         <div>
-            <h3 className="font-semibold text-white">AI Consultant</h3>
+            <h3 className="font-semibold text-white">Consultor IA</h3>
             <div className="flex items-center gap-2 text-xs text-slate-400">
                 <span className="w-2 h-2 rounded-full bg-green-500"></span>
                 Online · {state.style}
@@ -99,7 +99,7 @@ export const ChatPanel: React.FC = () => {
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Ask for changes or advice..."
+            placeholder="Peça ajustes ou conselhos..."
             className="w-full bg-slate-800 text-white rounded-xl pl-4 pr-12 py-3 text-sm border border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none h-12 max-h-32 custom-scrollbar"
             rows={1}
           />

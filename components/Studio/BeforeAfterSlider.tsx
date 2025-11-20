@@ -52,7 +52,7 @@ export const BeforeAfterSlider: React.FC<BeforeAfterSliderProps> = ({ beforeImag
           className="absolute top-0 left-0 w-full h-full object-cover"
         />
         <div className="absolute top-4 right-4 bg-indigo-600/90 backdrop-blur-md px-3 py-1 rounded-full text-xs font-bold text-white z-10 pointer-events-none">
-          AI PROPOSAL
+          PROPOSTA IA
         </div>
       </div>
 
