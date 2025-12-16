@@ -60,17 +60,14 @@ const localApiPlugin = (): Plugin => ({
 });
 
 export default defineConfig(({ mode }) => {
-  // Carrega variǭveis do .env.* e injeta GEMINI_API_KEY no process.env
+  // Carrega variaveis do .env.* e injeta no process.env
   const env = loadEnv(mode, process.cwd(), '');
-  if (env.GEMINI_API_KEY) {
-    process.env.GEMINI_API_KEY = env.GEMINI_API_KEY;
-  }
-  if (env.IMAGE_BUCKET_NAME) {
-    process.env.IMAGE_BUCKET_NAME = env.IMAGE_BUCKET_NAME;
-  }
-  if (env.IMAGE_BUCKET_BASE_URL) {
-    process.env.IMAGE_BUCKET_BASE_URL = env.IMAGE_BUCKET_BASE_URL;
-  }
+  if (env.GEMINI_API_KEY) process.env.GEMINI_API_KEY = env.GEMINI_API_KEY;
+  if (env.OPENAI_API_KEY) process.env.OPENAI_API_KEY = env.OPENAI_API_KEY;
+  if (env.AI_PROVIDER) process.env.AI_PROVIDER = env.AI_PROVIDER;
+  if (env.IMAGE_BUCKET_NAME) process.env.IMAGE_BUCKET_NAME = env.IMAGE_BUCKET_NAME;
+  if (env.IMAGE_BUCKET_BASE_URL) process.env.IMAGE_BUCKET_BASE_URL = env.IMAGE_BUCKET_BASE_URL;
+
   return {
     server: {
       port: 3000,
@@ -80,6 +77,8 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.API_KEY': JSON.stringify(env.GEMINI_API_KEY),
       'process.env.GEMINI_API_KEY': JSON.stringify(env.GEMINI_API_KEY),
+      'process.env.OPENAI_API_KEY': JSON.stringify(env.OPENAI_API_KEY),
+      'process.env.AI_PROVIDER': JSON.stringify(env.AI_PROVIDER),
     },
     resolve: {
       alias: {
