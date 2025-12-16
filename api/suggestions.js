@@ -19,22 +19,22 @@ export default async function handler(req, res) {
   const fallback = [
     {
       id: '1',
-      title: 'Sele��ǜo de Mobiliǭrio',
-      description: 'Pe��as-chave para definir o estilo e manter o fluxo do ambiente.',
-      items: ['Sofǭ neutro', 'Tapete texturizado', 'Mesa lateral leve'],
-      tags: ['Mobiliǭrio', 'Layout'],
+      title: 'Seleção de Mobiliário',
+      description: 'Peças-chave para definir o estilo e manter o fluxo do ambiente.',
+      items: ['Sofá neutro', 'Tapete texturizado', 'Mesa lateral leve'],
+      tags: ['Mobiliário', 'Layout'],
     },
     {
       id: '2',
-      title: 'Ilumina��ǜo e Clima',
+      title: 'Iluminação e Clima',
       description: 'Camadas de luz para conforto e funcionalidade.',
-      items: ['Luminǭria de piso', 'Pendentes quentes 2700K', 'Dimmers'],
-      tags: ['Ilumina��ǜo', 'Ambiente'],
+      items: ['Luminária de piso', 'Pendentes quentes 2700K', 'Dimmers'],
+      tags: ['Iluminação', 'Ambiente'],
     },
     {
       id: '3',
       title: 'Materiais e Texturas',
-      description: 'Combina��ǜo de texturas para enriquecer o espa��o.',
+      description: 'Combinação de texturas para enriquecer o espaço.',
       items: ['Madeira natural', 'Metal preto fosco', 'Tecidos de linho'],
       tags: ['Materiais', 'Texturas'],
     },
@@ -44,11 +44,11 @@ export default async function handler(req, res) {
     const { style, params } = req.body || {};
 
     const prompt = `
-Gere 3 sugest��es de design curtas em formato JSON para um ambiente.
+Gere 3 sugestões de design curtas em formato JSON para um ambiente.
 Campos: id (string), title, description, items (array de 3 itens curtos), tags (array de 2 tags curtas).
-Fale em portuguǦs do Brasil.
-Contexto: estilo=${style}; ambiente=${params?.roomType}; ǭrea=${params?.area}m2; or��amento=${params?.budget}; cores=${(params?.colors || []).join(', ')}; ousadia=${params?.boldness}.
-Responda APENAS com JSON vǭlido (array).
+Fale em português do Brasil.
+Contexto: estilo=${style}; ambiente=${params?.roomType}; área=${params?.area}m2; orçamento=${params?.budget}; cores=${(params?.colors || []).join(', ')}; ousadia=${params?.boldness}.
+Responda APENAS com JSON válido (array).
     `.trim();
 
     let text = '';
@@ -56,7 +56,7 @@ Responda APENAS com JSON vǭlido (array).
       const client = new OpenAI({ apiKey: openaiKey });
       const completion = await client.chat.completions.create({
         model: 'gpt-4o-mini',
-        messages: [{ role: 'system', content: 'Responda apenas com JSON vǭlido.' }, { role: 'user', content: prompt }],
+        messages: [{ role: 'system', content: 'Responda apenas com JSON válido.' }, { role: 'user', content: prompt }],
         temperature: 0.7,
       });
       text = completion.choices[0]?.message?.content || '';
@@ -76,7 +76,7 @@ Responda APENAS com JSON vǭlido (array).
 
     const suggestions = (Array.isArray(parsed) ? parsed : fallback).slice(0, 3).map((s, idx) => ({
       id: s.id ?? String(idx + 1),
-      title: s.title ?? 'Sugestǜo',
+      title: s.title ?? 'Sugestão',
       description: s.description ?? '',
       items: Array.isArray(s.items) ? s.items : [],
       tags: Array.isArray(s.tags) ? s.tags : [],

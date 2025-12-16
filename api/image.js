@@ -6,12 +6,12 @@ const storage = new Storage();
 const FALLBACK_URL = 'https://placehold.co/800x600?text=Proposta+IA';
 
 const buildPrompt = (style, originalUrl) => `
-Voc�� �� um assistente de visualiza�������oo de interiores. Gere um prompt conciso (1 frase) para gerar uma nova vers��o do ambiente no estilo ${style}.
-Foque em materiais, ilumina�������oo, paleta e mobili��rio mantendo a disposi�������oo original (${originalUrl || 'sem URL fornecida'}).
+Você é um assistente de visualização de interiores. Gere um prompt conciso (1 frase) para gerar uma nova versão do ambiente no estilo ${style}.
+Foque em materiais, iluminação, paleta e mobiliário mantendo a disposição original (${originalUrl || 'sem URL fornecida'}).
 Responda apenas com o prompt de imagem.`;
 
 const directPrompt = (style, originalUrl) =>
-  `Recrie a foto do ambiente (${originalUrl || 'imagem enviada'}) no estilo ${style}, preservando layout e propor��es. Destaque materiais, paleta e ilumina�������oo coerentes com ${style}.`;
+  `Recrie a foto do ambiente (${originalUrl || 'imagem enviada'}) no estilo ${style}, preservando layout e proporções. Destaque materiais, paleta e iluminação coerentes com ${style}.`;
 
 const getEnvBucket = () => {
   const bucketName = process.env.IMAGE_BUCKET_NAME || process.env.PUBLIC_IMAGE_BUCKET;

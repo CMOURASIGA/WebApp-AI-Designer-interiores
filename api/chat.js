@@ -20,9 +20,9 @@ export default async function handler(req, res) {
     const { history = [], userMessage = '', context = {} } = req.body || {};
 
     const systemPrompt = `
-VocǦ Ǹ um consultor de design de interiores. Responda de forma breve e prǭtica em portuguǦs.
-Considere estilo atual, tipo de ambiente, ǭrea, or��amento, cores e ousadia.
-Mantenha respostas em tom colaborativo, sem listas longas a menos que o usuǭrio pe��a.
+Você é um consultor de design de interiores. Responda de forma breve e prática em português.
+Considere estilo atual, tipo de ambiente, área, orçamento, cores e ousadia.
+Mantenha respostas em tom colaborativo, sem listas longas a menos que o usuário peça.
     `.trim();
 
     let reply = '';
@@ -39,7 +39,7 @@ Mantenha respostas em tom colaborativo, sem listas longas a menos que o usuǭrio
           })),
           {
             role: 'user',
-            content: `Contexto: estilo=${context.style}; ambiente=${context.params?.roomType}; ǭrea=${context.params?.area}m2; or��amento=${context.params?.budget}; cores=${(context.params?.colors || []).join(', ')}; ousadia=${context.params?.boldness}.
+            content: `Contexto: estilo=${context.style}; ambiente=${context.params?.roomType}; área=${context.params?.area}m2; orçamento=${context.params?.budget}; cores=${(context.params?.colors || []).join(', ')}; ousadia=${context.params?.boldness}.
 Pergunta: ${userMessage}`,
           },
         ],
@@ -59,7 +59,7 @@ Pergunta: ${userMessage}`,
           role: 'user',
           parts: [
             {
-              text: `Contexto: estilo=${context.style}; ambiente=${context.params?.roomType}; ǭrea=${context.params?.area}m2; or��amento=${context.params?.budget}; cores=${(context.params?.colors || []).join(', ')}; ousadia=${context.params?.boldness}.
+              text: `Contexto: estilo=${context.style}; ambiente=${context.params?.roomType}; área=${context.params?.area}m2; orçamento=${context.params?.budget}; cores=${(context.params?.colors || []).join(', ')}; ousadia=${context.params?.boldness}.
 Pergunta: ${userMessage}`,
             },
           ],
@@ -73,6 +73,6 @@ Pergunta: ${userMessage}`,
     return res.status(200).json({ reply });
   } catch (error) {
     console.error('Chat API error', error);
-    return res.status(200).json({ reply: 'Nǜo consegui gerar resposta agora. Tente novamente em instantes.', error: 'Failed to generate response' });
+    return res.status(200).json({ reply: 'Não consegui gerar resposta agora. Tente novamente em instantes.', error: 'Failed to generate response' });
   }
 }
