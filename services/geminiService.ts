@@ -1,9 +1,9 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import { Message, Suggestion, ProjectParams } from '../types';
 
-// Função para garantir nova instância com a chave mais atual (injetada pelo aistudio bridge)
+// Função para garantir nova instância com a chave mais atual
 const getAI = () => {
-  // O SDK exige que a chave seja passada em um objeto: new GoogleGenAI({ apiKey: ... })
   return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 };
 
@@ -26,13 +26,17 @@ async function urlToBase64(url: string): Promise<{ data: string; mimeType: strin
   }
 }
 
-// Handler genérico para erros de quota ou entidade
 const handleAiError = async (error: any) => {
   const errorMessage = error?.message || "";
-  if (errorMessage.includes("Requested entity was not found") || errorMessage.includes("429")) {
+  console.error("AI Service Error:", error);
+
+  if (errorMessage.includes("429")) {
+    alert("Limite de cota atingido (Erro 429). Por favor, aguarde um momento ou use uma chave com faturamento ativo.");
+  } else if (errorMessage.includes("Requested entity was not found")) {
     if (window.aistudio) {
-      alert("Sua cota expirou ou a chave é inválida. Por favor, selecione uma chave de API válida (GCP com faturamento ativo).");
       await window.aistudio.openSelectKey();
+    } else {
+      alert("Chave de API inválida ou não encontrada nas configurações do ambiente.");
     }
   }
   throw error;
@@ -52,7 +56,7 @@ export const chatService = {
           { role: 'user', parts: [{ text: userMessage }] }
         ],
         config: {
-          systemInstruction: `Você é um Consultor de Design de Interiores experiente. O projeto é uma ${context.params.roomType} no estilo ${context.style}. Orçamento ${context.params.budget}. Responda de forma profissional e inspiradora em Português.`,
+          systemInstruction: `Você é um Consultor de Design de Interiores. Projeto: ${context.params.roomType}, estilo: ${context.style}, orçamento: ${context.params.budget}. Responda em Português.`,
         },
       });
 
@@ -74,7 +78,7 @@ export const designService = {
       const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Gere 3 sugestões técnicas e criativas em formato JSON para uma ${params.roomType} no estilo ${style}.`,
+        contents: `Gere 3 sugestões JSON para ${params.roomType} estilo ${style}.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -94,7 +98,7 @@ export const designService = {
       });
       return JSON.parse(response.text || '[]');
     } catch (e) {
-      console.error("Erro ao gerar sugestões JSON:", e);
+      console.error(e);
       return [];
     }
   }
@@ -104,13 +108,14 @@ export const imageService = {
   generateInitialRoom: async (roomType: string): Promise<string> => {
     try {
       const ai = getAI();
+      // Usando gemini-2.5-flash-image para melhor disponibilidade de cota gratuita
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
+        model: 'gemini-2.5-flash-image',
         contents: {
-          parts: [{ text: `High-end professional architectural photography of an empty, well-lit ${roomType}, minimalist shell, 8k resolution, neutral lighting.` }]
+          parts: [{ text: `High-end professional architectural photography of an empty ${roomType}, architectural digest style, 8k resolution.` }]
         },
         config: {
-          imageConfig: { aspectRatio: "16:9", imageSize: "1K" }
+          imageConfig: { aspectRatio: "16:9" }
         }
       });
 
@@ -118,7 +123,7 @@ export const imageService = {
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("Dados de imagem não retornados pela IA.");
+      throw new Error("Não foi possível gerar a imagem.");
     } catch (error) {
       return await handleAiError(error);
     }
@@ -130,15 +135,15 @@ export const imageService = {
       const { data, mimeType } = await urlToBase64(originalUrl);
       
       const response = await ai.models.generateContent({
-        model: 'gemini-3-pro-image-preview',
+        model: 'gemini-2.5-flash-image',
         contents: {
           parts: [
             { inlineData: { data, mimeType } },
-            { text: `Redesign this interior space in ${style} style. Implement a ${params.boldness.toLowerCase()} approach. Main color palette: ${params.colors.join(', ')}. Ensure realistic lighting, high-end materials, and professional composition. 4k resolution.` }
+            { text: `Redesign this interior in ${style} style. Colors: ${params.colors.join(', ')}. Photorealistic, professional interior design.` }
           ]
         },
         config: {
-          imageConfig: { aspectRatio: "16:9", imageSize: "1K" }
+          imageConfig: { aspectRatio: "16:9" }
         }
       });
 
@@ -146,7 +151,7 @@ export const imageService = {
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("A IA não conseguiu gerar a imagem de proposta.");
+      throw new Error("A IA não retornou uma imagem.");
     } catch (error) {
       return await handleAiError(error);
     }

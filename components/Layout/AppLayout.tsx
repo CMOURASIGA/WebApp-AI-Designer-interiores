@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -5,30 +6,31 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-// Global declaration for the aistudio bridge
-// Fixed: Using inline definition and making it optional to avoid modifier and type clashing issues
 declare global {
   interface Window {
-    aistudio?: {
-      hasSelectedApiKey: () => Promise<boolean>;
-      openSelectKey: () => Promise<void>;
-    };
+    // Use any to avoid conflict with pre-defined AIStudio type in the environment
+    aistudio?: any;
   }
 }
 
 export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
   const location = useLocation();
   const [hasKey, setHasKey] = useState(false);
+  const [isAiStudio, setIsAiStudio] = useState(false);
 
   useEffect(() => {
     const checkKey = async () => {
-      try {
-        if (window.aistudio) {
+      if (window.aistudio) {
+        setIsAiStudio(true);
+        try {
           const selected = await window.aistudio.hasSelectedApiKey();
           setHasKey(selected);
+        } catch (err) {
+          console.error(err);
         }
-      } catch (err) {
-        console.error("Erro ao verificar chave no aistudio bridge:", err);
+      } else {
+        // Em produção/Vercel, verificamos se a variável de ambiente existe (injetada pelo build)
+        setHasKey(!!process.env.API_KEY);
       }
     };
     checkKey();
@@ -38,13 +40,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     if (window.aistudio) {
       try {
         await window.aistudio.openSelectKey();
-        // Após abrir o seletor, assumimos que o usuário selecionará uma chave
+        // GUIDELINE: Assume success after triggering openSelectKey to avoid race conditions.
         setHasKey(true);
       } catch (err) {
-        console.error("Erro ao abrir seletor de chaves:", err);
+        console.error(err);
       }
     } else {
-      alert("O seletor de chaves não está disponível neste ambiente.");
+      alert("Para usar fora do AI Studio, configure a variável API_KEY nas configurações do seu projeto (Vercel/Hosting).");
     }
   };
 
@@ -60,7 +62,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
             </div>
             <div>
               <h1 className="text-lg font-bold font-display tracking-tight text-white">
-                AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">Interiores Pro</span>
+                AI <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 to-violet-400">Interiores</span>
               </h1>
             </div>
           </Link>
@@ -68,7 +70,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <nav className="flex items-center gap-4">
              <button 
                onClick={handleSelectKey}
-               title="Configurar chave de API para evitar limites de cota"
                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                  hasKey 
                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
@@ -76,7 +77,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                }`}
              >
                <span className={`w-1.5 h-1.5 rounded-full ${hasKey ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-               {hasKey ? 'API Ativa' : 'Configurar API Pro'}
+               {isAiStudio ? (hasKey ? 'API Ativa' : 'Configurar API') : (hasKey ? 'Status: Online' : 'Falta API_KEY')}
              </button>
 
              {location.pathname === '/studio' && (
@@ -94,11 +95,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       <footer className="border-t border-white/5 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs">
-          <p>© 2024 AI Consultor de Interiores. Powered by Gemini 3 Pro.</p>
+          <p>© 2024 AI Consultor de Interiores. Powered by Gemini Flash.</p>
           <div className="flex gap-4">
-            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="hover:text-indigo-400">Docs de Faturamento</a>
-            <span className="text-slate-700">|</span>
-            <span className="text-slate-600">v1.1.0-pro</span>
+            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="hover:text-indigo-400">Faturamento API</a>
           </div>
         </div>
       </footer>
