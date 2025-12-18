@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -5,16 +6,14 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-// Define the AIStudio interface to resolve subsequent declaration type mismatch with global definitions
-interface AIStudio {
-  hasSelectedApiKey: () => Promise<boolean>;
-  openSelectKey: () => Promise<void>;
-}
-
+// Fix: Moving the interface declaration inside declare global to ensure it matches
+// the global environment's expectation and avoids "subsequent property declaration" errors.
 declare global {
+  interface AIStudio {
+    hasSelectedApiKey: () => Promise<boolean>;
+    openSelectKey: () => Promise<void>;
+  }
   interface Window {
-    // Fix: Subsequent property declarations must have the same type.
-    // Use AIStudio instead of any.
     aistudio?: AIStudio;
   }
 }
