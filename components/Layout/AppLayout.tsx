@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -6,10 +5,17 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
+// Define the AIStudio interface to resolve subsequent declaration type mismatch with global definitions
+interface AIStudio {
+  hasSelectedApiKey: () => Promise<boolean>;
+  openSelectKey: () => Promise<void>;
+}
+
 declare global {
   interface Window {
-    // Use any to avoid conflict with pre-defined AIStudio type in the environment
-    aistudio?: any;
+    // Fix: Subsequent property declarations must have the same type.
+    // Use AIStudio instead of any.
+    aistudio?: AIStudio;
   }
 }
 
@@ -29,7 +35,6 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           console.error(err);
         }
       } else {
-        // Em produção/Vercel, verificamos se a variável de ambiente existe (injetada pelo build)
         setHasKey(!!process.env.API_KEY);
       }
     };
@@ -40,13 +45,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
     if (window.aistudio) {
       try {
         await window.aistudio.openSelectKey();
-        // GUIDELINE: Assume success after triggering openSelectKey to avoid race conditions.
+        // Race condition mitigation: assume success as per guidelines
         setHasKey(true);
       } catch (err) {
         console.error(err);
       }
     } else {
-      alert("Para usar fora do AI Studio, configure a variável API_KEY nas configurações do seu projeto (Vercel/Hosting).");
+      alert("Você está fora do ambiente de testes. Configure sua API_KEY nas variáveis de ambiente do seu servidor/Vercel.");
     }
   };
 
@@ -68,6 +73,16 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           </Link>
           
           <nav className="flex items-center gap-4">
+             <div className="hidden md:block">
+                <a 
+                  href="https://ai.google.dev/gemini-api/docs/billing" 
+                  target="_blank" 
+                  rel="noreferrer"
+                  className="text-[10px] text-slate-500 hover:text-indigo-400 uppercase font-bold tracking-widest mr-4"
+                >
+                  Documentação de Faturamento
+                </a>
+             </div>
              <button 
                onClick={handleSelectKey}
                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
@@ -77,14 +92,8 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
                }`}
              >
                <span className={`w-1.5 h-1.5 rounded-full ${hasKey ? 'bg-emerald-400' : 'bg-amber-400'}`}></span>
-               {isAiStudio ? (hasKey ? 'API Ativa' : 'Configurar API') : (hasKey ? 'Status: Online' : 'Falta API_KEY')}
+               {isAiStudio ? (hasKey ? 'API Pronta' : 'Ativar API Paga') : (hasKey ? 'Online' : 'Falta Chave')}
              </button>
-
-             {location.pathname === '/studio' && (
-               <Link to="/presentation" className="hidden sm:inline-flex text-sm font-medium text-slate-400 hover:text-white transition-colors">
-                 Apresentação
-               </Link>
-             )}
           </nav>
         </div>
       </header>
@@ -94,10 +103,10 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
       </main>
 
       <footer className="border-t border-white/5 py-8 mt-auto">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs">
-          <p>© 2024 AI Consultor de Interiores. Powered by Gemini Flash.</p>
+        <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs text-center md:text-left">
+          <p>© 2024 AI Consultor de Interiores. Imagens via Gemini 2.5 Flash Image.</p>
           <div className="flex gap-4">
-            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="hover:text-indigo-400">Faturamento API</a>
+            <span className="text-slate-600 italic">Dica: Use uma chave com faturamento para evitar erros de cota.</span>
           </div>
         </div>
       </footer>

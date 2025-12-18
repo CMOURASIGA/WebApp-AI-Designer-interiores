@@ -28,17 +28,33 @@ async function urlToBase64(url: string): Promise<{ data: string; mimeType: strin
 
 const handleAiError = async (error: any) => {
   const errorMessage = error?.message || "";
-  console.error("AI Service Error:", error);
+  console.error("AI Service Error Detail:", error);
 
-  if (errorMessage.includes("429")) {
-    alert("Limite de cota atingido (Erro 429). Por favor, aguarde um momento ou use uma chave com faturamento ativo.");
-  } else if (errorMessage.includes("Requested entity was not found")) {
+  // Erro 429: Quota atingida ou Billing necessário
+  if (errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
+    const isImageTask = errorMessage.includes("image");
+    
+    if (isImageTask) {
+      alert("ERRO DE COTA (429): A geração de imagens exige uma API Key de um projeto com faturamento (billing) ativado no Google Cloud. Chaves do plano gratuito costumam ter cota zero para imagens.");
+    } else {
+      alert("Limite de cota de texto atingido. Aguarde alguns segundos e tente novamente.");
+    }
+    
+    // Se estiver no AI Studio, abre o seletor para trocar por uma chave paga
     if (window.aistudio) {
       await window.aistudio.openSelectKey();
+    }
+  } 
+  // Erro de entidade não encontrada (chave inválida ou expirada)
+  else if (errorMessage.includes("Requested entity was not found")) {
+    if (window.aistudio) {
+      alert("Chave de API não encontrada ou expirada. Selecione uma nova chave.");
+      await window.aistudio.openSelectKey();
     } else {
-      alert("Chave de API inválida ou não encontrada nas configurações do ambiente.");
+      alert("Chave de API inválida. Configure a variável de ambiente API_KEY corretamente.");
     }
   }
+  
   throw error;
 };
 
@@ -56,7 +72,7 @@ export const chatService = {
           { role: 'user', parts: [{ text: userMessage }] }
         ],
         config: {
-          systemInstruction: `Você é um Consultor de Design de Interiores. Projeto: ${context.params.roomType}, estilo: ${context.style}, orçamento: ${context.params.budget}. Responda em Português.`,
+          systemInstruction: `Você é um Consultor de Design de Interiores. Projeto: ${context.params.roomType}, estilo: ${context.style}, orçamento: ${context.params.budget}. Responda em Português de forma profissional e curta.`,
         },
       });
 
@@ -78,7 +94,7 @@ export const designService = {
       const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Gere 3 sugestões JSON para ${params.roomType} estilo ${style}.`,
+        contents: `Gere 3 sugestões técnicas em JSON para decorar um(a) ${params.roomType} no estilo ${style}.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -98,7 +114,7 @@ export const designService = {
       });
       return JSON.parse(response.text || '[]');
     } catch (e) {
-      console.error(e);
+      console.error("Erro em Sugestões:", e);
       return [];
     }
   }
@@ -108,11 +124,10 @@ export const imageService = {
   generateInitialRoom: async (roomType: string): Promise<string> => {
     try {
       const ai = getAI();
-      // Usando gemini-2.5-flash-image para melhor disponibilidade de cota gratuita
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
-          parts: [{ text: `High-end professional architectural photography of an empty ${roomType}, architectural digest style, 8k resolution.` }]
+          parts: [{ text: `Professional interior design photo of an empty, minimalist ${roomType}, wide angle, 8k, architectural magazine style.` }]
         },
         config: {
           imageConfig: { aspectRatio: "16:9" }
@@ -123,7 +138,7 @@ export const imageService = {
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("Não foi possível gerar a imagem.");
+      throw new Error("Falha ao receber imagem da IA.");
     } catch (error) {
       return await handleAiError(error);
     }
@@ -139,7 +154,7 @@ export const imageService = {
         contents: {
           parts: [
             { inlineData: { data, mimeType } },
-            { text: `Redesign this interior in ${style} style. Colors: ${params.colors.join(', ')}. Photorealistic, professional interior design.` }
+            { text: `Redesign this room exactly as it is but in ${style} style. Use a ${params.colors.join(' and ')} color palette. Photorealistic, 8k resolution, professional lighting.` }
           ]
         },
         config: {
@@ -151,7 +166,7 @@ export const imageService = {
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("A IA não retornou uma imagem.");
+      throw new Error("Não foi possível processar a imagem.");
     } catch (error) {
       return await handleAiError(error);
     }
