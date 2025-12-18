@@ -10,7 +10,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
-      // Shim para process.env exigido por alguns SDKs no browser
+      // Shim para process.env exigido pelo SDK no browser
       window.process = window.process || { env: {} };
       
       tailwind.config = {
@@ -37,6 +37,10 @@
       body {
         background-color: #0B0F19;
         color: #f8fafc;
+        margin: 0;
+      }
+      #root {
+        min-height: 100vh;
       }
       ::-webkit-scrollbar {
         width: 8px;
@@ -65,19 +69,21 @@
         scrollbar-width: none;
       }
     </style>
-  <script type="importmap">
-{
-  "imports": {
-    "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
-    "react/": "https://aistudiocdn.com/react@^19.2.0/",
-    "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
-    "@google/genai": "https://esm.run/@google/genai"
-  }
-}
-</script>
-</head>
+    <script type="importmap">
+    {
+      "imports": {
+        "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
+        "react/": "https://aistudiocdn.com/react@^19.2.0/",
+        "react": "https://aistudiocdn.com/react@^19.2.0",
+        "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+        "@google/genai": "https://esm.run/@google/genai"
+      }
+    }
+    </script>
+  </head>
   <body>
     <div id="root"></div>
+    <!-- CRITICAL: Carrega o arquivo principal da aplicação -->
+    <script type="module" src="./index.tsx"></script>
   </body>
 </html>
