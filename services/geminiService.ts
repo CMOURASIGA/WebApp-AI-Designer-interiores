@@ -2,7 +2,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { Message, Suggestion, ProjectParams } from '../types';
 
-// Função para garantir nova instância com a chave mais atual
 const getAI = () => {
   return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 };
@@ -26,35 +25,15 @@ async function urlToBase64(url: string): Promise<{ data: string; mimeType: strin
   }
 }
 
-const handleAiError = async (error: any) => {
+const handleAiError = async (error: any, silent: boolean = false) => {
   const errorMessage = error?.message || "";
-  console.error("AI Service Error Detail:", error);
-
-  // Erro 429: Quota atingida ou Billing necessário
   if (errorMessage.includes("429") || errorMessage.includes("RESOURCE_EXHAUSTED")) {
-    const isImageTask = errorMessage.includes("image");
-    
-    if (isImageTask) {
-      alert("ERRO DE COTA (429): A geração de imagens exige uma API Key de um projeto com faturamento (billing) ativado no Google Cloud. Chaves do plano gratuito costumam ter cota zero para imagens.");
-    } else {
-      alert("Limite de cota de texto atingido. Aguarde alguns segundos e tente novamente.");
-    }
-    
-    // Se estiver no AI Studio, abre o seletor para trocar por uma chave paga
-    if (window.aistudio) {
-      await window.aistudio.openSelectKey();
-    }
+    return "QUOTA_ERROR";
   } 
-  // Erro de entidade não encontrada (chave inválida ou expirada)
-  else if (errorMessage.includes("Requested entity was not found")) {
-    if (window.aistudio) {
-      alert("Chave de API não encontrada ou expirada. Selecione uma nova chave.");
-      await window.aistudio.openSelectKey();
-    } else {
-      alert("Chave de API inválida. Configure a variável de ambiente API_KEY corretamente.");
-    }
+  if (errorMessage.includes("Requested entity was not found")) {
+    if (window.aistudio && !silent) await window.aistudio.openSelectKey();
+    return "KEY_ERROR";
   }
-  
   throw error;
 };
 
@@ -72,18 +51,33 @@ export const chatService = {
           { role: 'user', parts: [{ text: userMessage }] }
         ],
         config: {
-          systemInstruction: `Você é um Consultor de Design de Interiores. Projeto: ${context.params.roomType}, estilo: ${context.style}, orçamento: ${context.params.budget}. Responda em Português de forma profissional e curta.`,
+          systemInstruction: `Você é um Arquiteto e Consultor de Interiores Premium. 
+          Ambiente: ${context.params.roomType}. Estilo: ${context.style}. 
+          Cores: ${context.params.colors.join(', ')}. Ousadia: ${context.params.boldness}.
+          
+          IMPORTANTE: Se a geração de imagem falhar, sua missão é ser EXTREMAMENTE descritivo. 
+          Fale sobre tecidos (linho, veludo), materiais (carvalho, metal escovado), iluminação (indireta, focada) e layout. 
+          O usuário deve conseguir visualizar o projeto apenas lendo sua descrição. 
+          Responda sempre em Português do Brasil com tom profissional e inspirador.`,
         },
       });
 
       return {
         id: Date.now().toString(),
         role: 'assistant',
-        content: response.text || "Sem resposta.",
+        content: response.text || "Estou preparando sua consultoria...",
         timestamp: Date.now(),
       };
     } catch (error) {
-      return await handleAiError(error);
+      const errorType = await handleAiError(error);
+      return {
+        id: 'err-' + Date.now(),
+        role: 'assistant',
+        content: errorType === "QUOTA_ERROR" 
+          ? "Atingimos o limite de mensagens da API gratuita. Aguarde um minuto e tente novamente." 
+          : "Tive um problema técnico. Pode repetir?",
+        timestamp: Date.now()
+      };
     }
   }
 };
@@ -94,7 +88,7 @@ export const designService = {
       const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Gere 3 sugestões técnicas em JSON para decorar um(a) ${params.roomType} no estilo ${style}.`,
+        contents: `Gere 3 sugestões técnicas em JSON para decorar um(a) ${params.roomType} no estilo ${style}. Orçamento: ${params.budget}.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -114,7 +108,6 @@ export const designService = {
       });
       return JSON.parse(response.text || '[]');
     } catch (e) {
-      console.error("Erro em Sugestões:", e);
       return [];
     }
   }
@@ -127,20 +120,18 @@ export const imageService = {
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
-          parts: [{ text: `Professional interior design photo of an empty, minimalist ${roomType}, wide angle, 8k, architectural magazine style.` }]
-        },
-        config: {
-          imageConfig: { aspectRatio: "16:9" }
+          parts: [{ text: `High quality professional interior photo of a ${roomType}, empty, minimalist, high ceiling, 8k.` }]
         }
       });
-
       const parts = response.candidates?.[0]?.content?.parts || [];
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("Falha ao receber imagem da IA.");
+      throw new Error("No image");
     } catch (error) {
-      return await handleAiError(error);
+      const errorType = await handleAiError(error, true);
+      if (errorType === "QUOTA_ERROR") return "IMAGE_QUOTA_EXHAUSTED";
+      throw error;
     }
   },
 
@@ -148,27 +139,24 @@ export const imageService = {
     try {
       const ai = getAI();
       const { data, mimeType } = await urlToBase64(originalUrl);
-      
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
           parts: [
             { inlineData: { data, mimeType } },
-            { text: `Redesign this room exactly as it is but in ${style} style. Use a ${params.colors.join(' and ')} color palette. Photorealistic, 8k resolution, professional lighting.` }
+            { text: `Redesign this exact room in ${style} style. Use a ${params.budget} budget approach. Colors: ${params.colors.join(', ')}. Professional architectural result.` }
           ]
-        },
-        config: {
-          imageConfig: { aspectRatio: "16:9" }
         }
       });
-
       const parts = response.candidates?.[0]?.content?.parts || [];
       for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("Não foi possível processar a imagem.");
+      throw new Error("No image");
     } catch (error) {
-      return await handleAiError(error);
+      const errorType = await handleAiError(error, true);
+      if (errorType === "QUOTA_ERROR") return "IMAGE_QUOTA_EXHAUSTED";
+      throw error;
     }
   }
 };

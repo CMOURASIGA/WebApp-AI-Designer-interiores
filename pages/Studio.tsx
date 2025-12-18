@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDesign } from '../context/DesignContext';
 import { AppLayout } from '../components/Layout/AppLayout';
@@ -8,11 +8,12 @@ import { ProjectControls } from '../components/Studio/ProjectControls';
 import { SuggestionCard } from '../components/Studio/SuggestionCard';
 import { BeforeAfterSlider } from '../components/Studio/BeforeAfterSlider';
 import { ChatPanel } from '../components/Chat/ChatPanel';
-import { designService, imageService } from '../services/geminiService';
+import { designService, imageService, chatService } from '../services/geminiService';
 
 const Studio: React.FC = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useDesign();
+  const [imageError, setImageError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!state.originalImage) navigate('/');
@@ -20,29 +21,43 @@ const Studio: React.FC = () => {
 
   const handleGenerate = async () => {
     dispatch({ type: 'SET_GENERATING', payload: true });
+    setImageError(null);
     
     try {
-      // Execução sequencial ou paralela das chamadas de IA
-      const [suggestions, newImage] = await Promise.all([
-        designService.generateSuggestions(state.style, state.params),
-        imageService.generateProposedImage(state.originalImage!, state.style, state.params)
-      ]);
-
+      // 1. Sempre gera sugestões técnicas (Modelo de texto tem mais cota)
+      const suggestions = await designService.generateSuggestions(state.style, state.params);
       dispatch({ type: 'SET_SUGGESTIONS', payload: suggestions });
-      dispatch({ type: 'SET_PROPOSED_IMAGE', payload: newImage });
+
+      // 2. Tenta gerar a imagem
+      const newImage = await imageService.generateProposedImage(state.originalImage!, state.style, state.params);
       
-      dispatch({ 
-        type: 'ADD_MESSAGE', 
-        payload: {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: `Analisei sua foto e apliquei o conceito ${state.style}. Reorganizei o espaço focando em ${state.params.colors.join(' e ')} para respeitar sua preferência. O que achou do novo visual?`,
-          timestamp: Date.now()
-        }
-      });
+      if (newImage === "IMAGE_QUOTA_EXHAUSTED") {
+        setImageError("Limite de imagens atingido na cota gratuita.");
+        
+        // 3. FALLBACK AUTOMÁTICO: O Chat descreve o que a imagem faria
+        const fallbackPrompt = `Infelizmente a geração visual falhou devido ao limite de cota da API. Como meu consultor, descreva em detalhes textuais como você planejou este ambiente no estilo ${state.style}, usando as cores ${state.params.colors.join(', ')} e um nível de ousadia ${state.params.boldness}. O que você mudou no mobiliário e na iluminação?`;
+        
+        const textFallback = await chatService.sendMessage(state.chatHistory, fallbackPrompt, { 
+          style: state.style, 
+          params: state.params 
+        });
+        
+        dispatch({ type: 'ADD_MESSAGE', payload: textFallback });
+      } else {
+        // Sucesso na imagem
+        dispatch({ type: 'SET_PROPOSED_IMAGE', payload: newImage });
+        dispatch({ 
+          type: 'ADD_MESSAGE', 
+          payload: {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: `Projeto visual concluído! Apliquei o estilo ${state.style}. Confira o comparativo e as sugestões detalhadas abaixo. O que achou dessa composição?`,
+            timestamp: Date.now()
+          }
+        });
+      }
     } catch (e) {
       console.error(e);
-      alert("Ocorreu um erro ao processar com a IA. Verifique sua conexão ou tente novamente.");
     } finally {
       dispatch({ type: 'SET_GENERATING', payload: false });
     }
@@ -67,65 +82,80 @@ const Studio: React.FC = () => {
                   afterImage={state.proposedImage} 
                 />
               ) : (
-                <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5">
-                   <img 
-                    src={state.originalImage || ''} 
-                    className="w-full h-full object-cover opacity-60" 
-                    alt="Original"
-                   />
-                   <div className="absolute inset-0 flex items-center justify-center bg-black/40">
-                     <button
-                        onClick={handleGenerate}
-                        disabled={state.isGenerating}
-                        className="px-6 py-3 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-lg shadow-indigo-500/30 transition-all flex items-center gap-2 disabled:opacity-70"
-                     >
-                       {state.isGenerating ? (
-                         <>
-                           <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin"></span>
-                           A IA está criando...
-                         </>
-                       ) : (
-                         <>
-                           <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
-                           Gerar Proposta IA
-                         </>
-                       )}
-                     </button>
-                   </div>
+                <div className="relative w-full aspect-video rounded-2xl overflow-hidden border border-white/5 bg-slate-900/50">
+                   {imageError ? (
+                     <div className="absolute inset-0 flex flex-col items-center justify-center p-8 text-center bg-slate-900/90 backdrop-blur-md">
+                        <div className="w-16 h-16 bg-indigo-500/10 rounded-full flex items-center justify-center mb-4">
+                           <svg className="w-8 h-8 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                        </div>
+                        <h3 className="text-white font-bold text-xl mb-2">Visualização Indisponível</h3>
+                        <p className="text-slate-400 max-w-md mb-6 text-sm">
+                          A API gratuita atingiu o limite de imagens. <br/>
+                          <span className="text-indigo-400 font-medium">Confira a descrição detalhada do consultor no Chat ao lado!</span>
+                        </p>
+                        <button onClick={handleGenerate} className="px-6 py-2 bg-indigo-600/20 hover:bg-indigo-600/30 text-indigo-400 rounded-lg border border-indigo-500/30 text-xs font-bold uppercase tracking-widest transition-all">Tentar Gerar Imagem Novamente</button>
+                     </div>
+                   ) : (
+                     <img 
+                      src={state.originalImage || ''} 
+                      className="w-full h-full object-cover opacity-40 grayscale" 
+                      alt="Original"
+                     />
+                   )}
+                   
+                   {!imageError && (
+                     <div className="absolute inset-0 flex items-center justify-center">
+                       <button
+                          onClick={handleGenerate}
+                          disabled={state.isGenerating}
+                          className="px-8 py-4 bg-indigo-600 hover:bg-indigo-500 text-white rounded-full font-bold shadow-2xl shadow-indigo-500/40 transition-all flex items-center gap-3 disabled:opacity-70 transform hover:scale-105 active:scale-95"
+                       >
+                         {state.isGenerating ? (
+                           <>
+                             <span className="w-5 h-5 border-3 border-white/30 border-t-white rounded-full animate-spin"></span>
+                             Consultando IA...
+                           </>
+                         ) : (
+                           <>
+                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19.428 15.428a2 2 0 00-1.022-.547l-2.387-.477a6 6 0 00-3.86.517l-.318.158a6 6 0 01-3.86.517L6.05 15.21a2 2 0 00-1.806.547M8 4h8l-1 1v5.172a2 2 0 00.586 1.414l5 5c1.26 1.26.367 3.414-1.415 3.414H4.828c-1.782 0-2.674-2.154-1.414-3.414l5-5A2 2 0 009 10.172V5L8 4z" /></svg>
+                             Gerar Proposta IA
+                           </>
+                         )}
+                       </button>
+                     </div>
+                   )}
                 </div>
               )}
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-6 pb-12">
               <div className="md:col-span-5 lg:col-span-4 space-y-4">
                 <div className="glass-panel p-5 rounded-2xl border border-white/5">
                   <h3 className="text-white font-semibold mb-4 flex items-center gap-2">
                     <svg className="w-4 h-4 text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                    Parâmetros do Projeto
+                    Filtros do Projeto
                   </h3>
                   <ProjectControls />
-                  {state.proposedImage && (
-                     <button
-                        onClick={handleGenerate}
-                        disabled={state.isGenerating}
-                        className="w-full mt-6 py-2.5 bg-slate-700 hover:bg-slate-600 text-slate-200 rounded-lg text-sm font-medium transition-colors"
-                     >
-                        {state.isGenerating ? 'Refazendo...' : 'Refazer com novos ajustes'}
-                     </button>
-                  )}
                 </div>
               </div>
 
               <div className="md:col-span-7 lg:col-span-8">
                  <div className="space-y-4">
-                    <h3 className="text-white font-semibold pl-1">Sugestões Estruturadas</h3>
+                    <h3 className="text-white font-semibold pl-1 flex items-center gap-2">
+                      <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                      Sugestões Estruturadas
+                    </h3>
                     {state.suggestions.length > 0 ? (
                       <div className="grid grid-cols-1 gap-4">
                         {state.suggestions.map(s => <SuggestionCard key={s.id} suggestion={s} />)}
                       </div>
                     ) : (
-                      <div className="border border-dashed border-slate-700 rounded-2xl p-8 text-center">
-                        <p className="text-slate-500 italic">As sugestões aparecerão após a geração da proposta.</p>
+                      <div className="border border-dashed border-slate-700 rounded-2xl p-12 text-center bg-white/2">
+                        <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                           <svg className="w-6 h-6 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" /></svg>
+                        </div>
+                        <p className="text-slate-400 font-medium">Pronto para começar?</p>
+                        <p className="text-slate-500 text-sm mt-1 italic">Mesmo sem imagem, você receberá dicas completas da IA.</p>
                       </div>
                     )}
                  </div>
@@ -133,7 +163,7 @@ const Studio: React.FC = () => {
             </div>
           </div>
 
-          <div className="flex-none lg:w-2/5 h-96 lg:h-auto border-t lg:border-t-0 lg:border-l border-white/5 bg-[#0B0F19] p-4">
+          <div className="flex-none lg:w-2/5 h-[450px] lg:h-auto border-t lg:border-t-0 lg:border-l border-white/5 bg-[#0B0F19] p-4 flex flex-col">
              <ChatPanel />
           </div>
         </div>
