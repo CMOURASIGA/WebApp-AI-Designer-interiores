@@ -51,21 +51,39 @@ export const chatService = {
           { role: 'user', parts: [{ text: userMessage }] }
         ],
         config: {
-          systemInstruction: `Você é um Arquiteto e Consultor de Interiores Premium. 
-          Ambiente: ${context.params.roomType}. Estilo: ${context.style}. 
-          Cores: ${context.params.colors.join(', ')}. Ousadia: ${context.params.boldness}.
+          systemInstruction: `Você é um Arquiteto Consultor Sênior. Sua comunicação deve ser estritamente técnica, organizada e visualmente hierarquizada.
           
-          IMPORTANTE: Se a geração de imagem falhar, sua missão é ser EXTREMAMENTE descritivo. 
-          Fale sobre tecidos (linho, veludo), materiais (carvalho, metal escovado), iluminação (indireta, focada) e layout. 
-          O usuário deve conseguir visualizar o projeto apenas lendo sua descrição. 
-          Responda sempre em Português do Brasil com tom profissional e inspirador.`,
+          REGRAS DE FORMATAÇÃO (OBRIGATÓRIO):
+          1. Use Títulos (### NOME DA SEÇÃO) para cada categoria.
+          2. Use Listas com marcadores para itens específicos.
+          3. Use **Negrito** apenas para materiais, cores ou marcas.
+          4. NÃO use textos introdutórios longos ou despedidas poéticas.
+          5. Vá direto ao ponto. Seja sucinto (Max 200 palavras).
+          
+          ESTRUTURA DA RESPOSTA:
+          ### CONCEITO GERAL
+          (Uma frase técnica resumindo a intenção do design)
+          
+          ### MOBILIÁRIO E LAYOUT
+          * Item (Material/Acabamento)
+          * Item (Layout/Posicionamento)
+          
+          ### PALETA E MATERIAIS
+          * Paredes: (Cor/Textura)
+          * Piso: (Material)
+          * Têxteis: (Tecido/Trama)
+          
+          ### ILUMINAÇÃO TÉCNICA
+          * Tipo de Peça (Temperatura de Cor/Função)
+          
+          Ambiente: ${context.params.roomType}. Estilo: ${context.style}.`,
         },
       });
 
       return {
         id: Date.now().toString(),
         role: 'assistant',
-        content: response.text || "Estou preparando sua consultoria...",
+        content: response.text || "Processando dados técnicos...",
         timestamp: Date.now(),
       };
     } catch (error) {
@@ -74,8 +92,8 @@ export const chatService = {
         id: 'err-' + Date.now(),
         role: 'assistant',
         content: errorType === "QUOTA_ERROR" 
-          ? "Atingimos o limite de mensagens da API gratuita. Aguarde um minuto e tente novamente." 
-          : "Tive um problema técnico. Pode repetir?",
+          ? "Cota de API excedida. Aguarde 60s." 
+          : "Erro técnico na resposta.",
         timestamp: Date.now()
       };
     }
@@ -120,7 +138,7 @@ export const imageService = {
       const response = await ai.models.generateContent({
         model: 'gemini-2.5-flash-image',
         contents: {
-          parts: [{ text: `High quality professional interior photo of a ${roomType}, empty, minimalist, high ceiling, 8k.` }]
+          parts: [{ text: `Empty architectural space of a ${roomType}, flat perspective, natural lighting, high resolution.` }]
         }
       });
       const parts = response.candidates?.[0]?.content?.parts || [];
@@ -144,7 +162,7 @@ export const imageService = {
         contents: {
           parts: [
             { inlineData: { data, mimeType } },
-            { text: `Redesign this exact room in ${style} style. Use a ${params.budget} budget approach. Colors: ${params.colors.join(', ')}. Professional architectural result.` }
+            { text: `Redesign this exact space: Style ${style}, Budget ${params.budget}, Palette ${params.colors.join(', ')}. Professional architectural photography.` }
           ]
         }
       });

@@ -10,7 +10,6 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
-      // Shim para process.env exigido pelo SDK no browser
       window.process = window.process || { env: {} };
       
       tailwind.config = {
@@ -68,6 +67,43 @@
         -ms-overflow-style: none;
         scrollbar-width: none;
       }
+
+      /* Estilização para o conteúdo do Chat (Markdown manual) */
+      .chat-content h3 {
+        font-weight: 700;
+        color: #818cf8;
+        margin-top: 1rem;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.05em;
+        border-bottom: 1px solid rgba(129, 140, 248, 0.2);
+        padding-bottom: 2px;
+      }
+      .chat-content p {
+        margin-bottom: 0.75rem;
+      }
+      .chat-content ul {
+        margin-bottom: 1rem;
+        list-style-type: none;
+        padding-left: 0;
+      }
+      .chat-content li {
+        position: relative;
+        padding-left: 1.25rem;
+        margin-bottom: 0.4rem;
+      }
+      .chat-content li::before {
+        content: "→";
+        position: absolute;
+        left: 0;
+        color: #6366f1;
+        font-weight: bold;
+      }
+      .chat-content strong {
+        color: #ffffff;
+        font-weight: 600;
+      }
     </style>
     <script type="importmap">
     {
@@ -83,7 +119,6 @@
   </head>
   <body>
     <div id="root"></div>
-    <!-- CRITICAL: Carrega o arquivo principal da aplicação -->
     <script type="module" src="./index.tsx"></script>
   </body>
 </html>
