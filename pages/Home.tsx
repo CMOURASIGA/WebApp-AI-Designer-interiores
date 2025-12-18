@@ -25,7 +25,6 @@ const Home: React.FC = () => {
   const handleGenerateAISample = async () => {
     setIsGeneratingSample(true);
     try {
-      // Usa o tipo de ambiente configurado nos parâmetros
       const imageUrl = await imageService.generateInitialRoom(state.params.roomType);
       if (imageUrl) {
         dispatch({ type: 'SET_IMAGE', payload: imageUrl });
@@ -81,7 +80,7 @@ const Home: React.FC = () => {
                   <select 
                     value={state.params.roomType}
                     onChange={(e) => updateRoomType(e.target.value)}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                   >
                     {ROOM_TYPES.map(r => <option key={r} value={r}>{r}</option>)}
                   </select>
@@ -91,12 +90,12 @@ const Home: React.FC = () => {
                   <select 
                     value={state.style}
                     onChange={(e) => dispatch({ type: 'SET_STYLE', payload: e.target.value })}
-                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all"
+                    className="w-full bg-slate-800 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-indigo-500 outline-none transition-all cursor-pointer"
                   >
-                    {SAMPLE_IMAGES.map(s => <option key={s.label} value={s.label}>{s.label}</option>)}
-                    {/* Fallback para estilos se necessário */}
                     <option value="Moderno">Moderno</option>
                     <option value="Industrial">Industrial</option>
+                    <option value="Escandinavo">Escandinavo</option>
+                    <option value="Minimalista">Minimalista</option>
                   </select>
                 </div>
               </div>
@@ -119,8 +118,13 @@ const Home: React.FC = () => {
                           onClick={() => handleSampleSelect(sample.url)}
                           className={`relative aspect-video rounded-lg overflow-hidden group border transition-all ${state.originalImage === sample.url ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-white/5 hover:border-white/20'}`}
                         >
-                          <img src={sample.url} alt={sample.label} className="w-full h-full object-cover opacity-70 group-hover:opacity-100 transition-opacity" />
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2">
+                          <img 
+                            src={sample.url} 
+                            alt={sample.label} 
+                            className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
+                            loading="lazy"
+                          />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex items-end p-2">
                             <span className="text-[10px] font-bold text-white uppercase tracking-tighter">{sample.label}</span>
                           </div>
                         </button>
