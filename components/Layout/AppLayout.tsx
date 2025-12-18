@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -6,10 +5,14 @@ interface AppLayoutProps {
   children: React.ReactNode;
 }
 
-// Fix: Declarations for 'aistudio' must match the predefined global AIStudio type
+// Global declaration for the aistudio bridge
+// Fixed: Using inline definition and making it optional to avoid modifier and type clashing issues
 declare global {
   interface Window {
-    aistudio: AIStudio;
+    aistudio?: {
+      hasSelectedApiKey: () => Promise<boolean>;
+      openSelectKey: () => Promise<void>;
+    };
   }
 }
 
@@ -19,9 +22,13 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   useEffect(() => {
     const checkKey = async () => {
-      if (window.aistudio) {
-        const selected = await window.aistudio.hasSelectedApiKey();
-        setHasKey(selected);
+      try {
+        if (window.aistudio) {
+          const selected = await window.aistudio.hasSelectedApiKey();
+          setHasKey(selected);
+        }
+      } catch (err) {
+        console.error("Erro ao verificar chave no aistudio bridge:", err);
       }
     };
     checkKey();
@@ -29,8 +36,15 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
   const handleSelectKey = async () => {
     if (window.aistudio) {
-      await window.aistudio.openSelectKey();
-      setHasKey(true);
+      try {
+        await window.aistudio.openSelectKey();
+        // Após abrir o seletor, assumimos que o usuário selecionará uma chave
+        setHasKey(true);
+      } catch (err) {
+        console.error("Erro ao abrir seletor de chaves:", err);
+      }
+    } else {
+      alert("O seletor de chaves não está disponível neste ambiente.");
     }
   };
 
@@ -54,6 +68,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
           <nav className="flex items-center gap-4">
              <button 
                onClick={handleSelectKey}
+               title="Configurar chave de API para evitar limites de cota"
                className={`flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-bold transition-all border ${
                  hasKey 
                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400' 
@@ -81,7 +96,9 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
         <div className="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4 text-slate-500 text-xs">
           <p>© 2024 AI Consultor de Interiores. Powered by Gemini 3 Pro.</p>
           <div className="flex gap-4">
-            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="hover:text-indigo-400">Documentação de Faturamento</a>
+            <a href="https://ai.google.dev/gemini-api/docs/billing" target="_blank" rel="noreferrer" className="hover:text-indigo-400">Docs de Faturamento</a>
+            <span className="text-slate-700">|</span>
+            <span className="text-slate-600">v1.1.0-pro</span>
           </div>
         </div>
       </footer>

@@ -1,11 +1,10 @@
-
 import { GoogleGenAI, Type } from "@google/genai";
 import { Message, Suggestion, ProjectParams } from '../types';
 
 // Função para garantir nova instância com a chave mais atual (injetada pelo aistudio bridge)
 const getAI = () => {
-  // Use process.env.API_KEY directly as required by guidelines
-  return new GoogleGenAI({ apiKey: process.env.API_KEY });
+  // O SDK exige que a chave seja passada em um objeto: new GoogleGenAI({ apiKey: ... })
+  return new GoogleGenAI({ apiKey: process.env.API_KEY || '' });
 };
 
 async function urlToBase64(url: string): Promise<{ data: string; mimeType: string }> {
@@ -32,7 +31,7 @@ const handleAiError = async (error: any) => {
   const errorMessage = error?.message || "";
   if (errorMessage.includes("Requested entity was not found") || errorMessage.includes("429")) {
     if (window.aistudio) {
-      alert("Sua cota expirou ou a chave é inválida. Por favor, selecione uma chave de API válida.");
+      alert("Sua cota expirou ou a chave é inválida. Por favor, selecione uma chave de API válida (GCP com faturamento ativo).");
       await window.aistudio.openSelectKey();
     }
   }
@@ -53,7 +52,7 @@ export const chatService = {
           { role: 'user', parts: [{ text: userMessage }] }
         ],
         config: {
-          systemInstruction: `Você é um Consultor de Design de Interiores experiente. O projeto é uma ${context.params.roomType} no estilo ${context.style}. Orçamento ${context.params.budget}. Responda em Português.`,
+          systemInstruction: `Você é um Consultor de Design de Interiores experiente. O projeto é uma ${context.params.roomType} no estilo ${context.style}. Orçamento ${context.params.budget}. Responda de forma profissional e inspiradora em Português.`,
         },
       });
 
@@ -75,7 +74,7 @@ export const designService = {
       const ai = getAI();
       const response = await ai.models.generateContent({
         model: "gemini-3-flash-preview",
-        contents: `Gere 3 sugestões JSON para ${params.roomType} estilo ${style}.`,
+        contents: `Gere 3 sugestões técnicas e criativas em formato JSON para uma ${params.roomType} no estilo ${style}.`,
         config: {
           responseMimeType: "application/json",
           responseSchema: {
@@ -95,7 +94,7 @@ export const designService = {
       });
       return JSON.parse(response.text || '[]');
     } catch (e) {
-      console.error(e);
+      console.error("Erro ao gerar sugestões JSON:", e);
       return [];
     }
   }
@@ -108,17 +107,18 @@ export const imageService = {
       const response = await ai.models.generateContent({
         model: 'gemini-3-pro-image-preview',
         contents: {
-          parts: [{ text: `High-end professional interior photography of an empty ${roomType}, architectural digest style, 8k resolution.` }]
+          parts: [{ text: `High-end professional architectural photography of an empty, well-lit ${roomType}, minimalist shell, 8k resolution, neutral lighting.` }]
         },
         config: {
           imageConfig: { aspectRatio: "16:9", imageSize: "1K" }
         }
       });
 
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
+      const parts = response.candidates?.[0]?.content?.parts || [];
+      for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("No image data");
+      throw new Error("Dados de imagem não retornados pela IA.");
     } catch (error) {
       return await handleAiError(error);
     }
@@ -134,7 +134,7 @@ export const imageService = {
         contents: {
           parts: [
             { inlineData: { data, mimeType } },
-            { text: `Redesign this room in ${style} style. Use colors: ${params.colors.join(', ')}. Photorealistic, 4k, interior design masterclass.` }
+            { text: `Redesign this interior space in ${style} style. Implement a ${params.boldness.toLowerCase()} approach. Main color palette: ${params.colors.join(', ')}. Ensure realistic lighting, high-end materials, and professional composition. 4k resolution.` }
           ]
         },
         config: {
@@ -142,8 +142,13 @@ export const imageService = {
         }
       });
 
-      for (const part of response.candidates?.[0]?.content?.parts || []) {
+      const parts = response.candidates?.[0]?.content?.parts || [];
+      for (const part of parts) {
         if (part.inlineData) return `data:${part.inlineData.mimeType};base64,${part.inlineData.data}`;
       }
-      throw new Error("No image data");
-    } catch (error
+      throw new Error("A IA não conseguiu gerar a imagem de proposta.");
+    } catch (error) {
+      return await handleAiError(error);
+    }
+  }
+};
