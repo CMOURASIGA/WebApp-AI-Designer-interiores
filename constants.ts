@@ -1,16 +1,17 @@
+
 export const INTERIOR_STYLES = [
-  'Moderno de Meio do Século',
+  'Mid-Century Modern',
   'Escandinavo',
   'Boho/Boêmio',
   'Industrial',
   'Minimalista',
   'Litorâneo',
   'Japandi',
-  'Art Déco',
-  'Rústico de Fazenda',
+  'Art Deco',
+  'Farmhouse',
   'Contemporâneo',
   'Rústico',
-  'Transicional',
+  'Transicional'
 ];
 
 export const ROOM_TYPES = [
@@ -20,25 +21,19 @@ export const ROOM_TYPES = [
   'Sala de Jantar',
   'Escritório',
   'Banheiro',
-  'Varanda',
+  'Varanda'
 ];
 
 export const BUDGET_OPTIONS = ['Baixo', 'Médio', 'Alto'];
 
 export const BOLDNESS_OPTIONS = ['Discreto', 'Equilibrado', 'Ousado'];
 
-// Imagens fixas para os exemplos (links diretos de imagem)
 export const SAMPLE_IMAGES = [
-  { label: 'Sala de Estar', url: 'https://i.imgur.com/ZvIli2u.jpg' },
-  { label: 'Quarto', url: 'https://i.imgur.com/nfrpXdQ.jpg' },
-  { label: 'Cozinha', url: 'https://i.imgur.com/x3jxHSB.jpg' },
+  { label: 'Sala de Estar', url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=800&auto=format&fit=crop' },
+  { label: 'Quarto Moderno', url: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=800&auto=format&fit=crop' },
+  { label: 'Cozinha Gourmet', url: 'https://images.unsplash.com/photo-1556911223-e1534ff039f2?q=80&w=800&auto=format&fit=crop' },
 ];
 
 export const COLOR_PALETTES = [
-  'Neutro',
-  'Tons Terrosos',
-  'Azuis Frios',
-  'Monocromático',
-  'Pastel',
-  'Vibrante',
+  'Neutro', 'Tons Terrosos', 'Azuis Frios', 'Monocromático', 'Pastel', 'Vibrante'
 ];

@@ -1,6 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { useDesign } from '../../context/DesignContext';
-import { chatService } from '../../services/mockServices';
+import { chatService } from '../../services/geminiService';
 
 export const ChatPanel: React.FC = () => {
   const { state, dispatch } = useDesign();
@@ -36,7 +37,16 @@ export const ChatPanel: React.FC = () => {
       );
       dispatch({ type: 'ADD_MESSAGE', payload: response });
     } catch (error) {
-      console.error("Chat Error", error);
+      console.error("Chat Gemini Error", error);
+      dispatch({ 
+        type: 'ADD_MESSAGE', 
+        payload: {
+          id: 'err-' + Date.now(),
+          role: 'assistant',
+          content: "Desculpe, tive um problema técnico para processar sua solicitação agora. Pode tentar novamente?",
+          timestamp: Date.now()
+        }
+      });
     } finally {
       setIsTyping(false);
     }
@@ -51,18 +61,16 @@ export const ChatPanel: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full bg-slate-900/50 rounded-2xl border border-white/5 overflow-hidden">
-      {/* Chat Header */}
       <div className="p-4 border-b border-white/5 bg-white/5 backdrop-blur flex justify-between items-center">
         <div>
             <h3 className="font-semibold text-white">Consultor IA</h3>
             <div className="flex items-center gap-2 text-xs text-slate-400">
-                <span className="w-2 h-2 rounded-full bg-green-500"></span>
-                Online · {state.style}
+                <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+                Conectado ao Gemini · {state.style}
             </div>
         </div>
       </div>
 
-      {/* Messages Area */}
       <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
         {state.chatHistory.map((msg) => (
           <div
@@ -83,29 +91,29 @@ export const ChatPanel: React.FC = () => {
         
         {isTyping && (
           <div className="flex justify-start">
-            <div className="bg-slate-800 p-4 rounded-2xl rounded-bl-none border border-slate-700 flex gap-1">
-              <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce"></span>
-              <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-75"></span>
-              <span className="w-2 h-2 bg-slate-500 rounded-full animate-bounce delay-150"></span>
+            <div className="bg-slate-800 p-4 rounded-2xl rounded-bl-none border border-slate-700 flex gap-1 items-center">
+              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"></div>
+              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-150"></div>
+              <div className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce delay-300"></div>
+              <span className="text-[10px] text-slate-500 font-bold ml-2 uppercase tracking-tighter">Gemini está digitando</span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Input Area */}
       <div className="p-4 bg-slate-900/80 border-t border-white/5">
         <div className="relative">
           <textarea
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             onKeyDown={handleKeyDown}
-            placeholder="Peça ajustes ou conselhos..."
+            placeholder="Pergunte sobre materiais, iluminação ou ajustes..."
             className="w-full bg-slate-800 text-white rounded-xl pl-4 pr-12 py-3 text-sm border border-slate-700 focus:ring-2 focus:ring-indigo-500 focus:outline-none resize-none h-12 max-h-32 custom-scrollbar"
             rows={1}
           />
           <button
             onClick={handleSend}
-            disabled={!inputValue.trim()}
+            disabled={!inputValue.trim() || isTyping}
             className="absolute right-2 top-1/2 -translate-y-1/2 p-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

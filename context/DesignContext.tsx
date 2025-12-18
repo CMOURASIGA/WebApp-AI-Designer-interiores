@@ -7,7 +7,7 @@ const initialParams: ProjectParams = {
   area: 25,
   budget: 'Médio',
   colors: ['Neutro'],
-  boldness: 'Equilibrado',
+  boldness: 'Equilibrado'
 };
 
 const initialState: DesignState = {
@@ -20,10 +20,9 @@ const initialState: DesignState = {
     {
       id: 'init',
       role: 'assistant',
-      content:
-        'Olá! Envie uma foto e escolha um estilo para começar. Estou aqui para ajudar você a visualizar o espaço dos seus sonhos.',
-      timestamp: Date.now(),
-    },
+      content: 'Olá! Envie uma foto e escolha um estilo para começar. Estou aqui para ajudar você a visualizar o espaço dos seus sonhos.',
+      timestamp: Date.now()
+    }
   ],
   isGenerating: false,
 };
@@ -59,7 +58,11 @@ const DesignContext = createContext<{
 export const DesignProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [state, dispatch] = useReducer(designReducer, initialState);
 
-  return <DesignContext.Provider value={{ state, dispatch }}>{children}</DesignContext.Provider>;
+  return (
+    <DesignContext.Provider value={{ state, dispatch }}>
+      {children}
+    </DesignContext.Provider>
+  );
 };
 
 export const useDesign = () => {

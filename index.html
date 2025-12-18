@@ -1,15 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="pt-BR">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Consultor de Design de Interiores IA</title>
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>AI Consultor de Interiores</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
     <script>
+      // Shim para process.env exigido por alguns SDKs no browser
+      window.process = window.process || { env: {} };
+      
       tailwind.config = {
         darkMode: 'class',
         theme: {
@@ -22,8 +25,8 @@
               brand: {
                 dark: '#0B0F19',
                 surface: '#151B2B',
-                accent: '#6366f1', // Indigo 500
-                glow: '#8b5cf6', // Violet 500
+                accent: '#6366f1',
+                glow: '#8b5cf6',
               }
             }
           }
@@ -35,7 +38,6 @@
         background-color: #0B0F19;
         color: #f8fafc;
       }
-      /* Custom scrollbar for dark theme */
       ::-webkit-scrollbar {
         width: 8px;
         height: 8px;
@@ -55,6 +57,13 @@
         backdrop-filter: blur(12px);
         border: 1px solid rgba(255, 255, 255, 0.08);
       }
+      .no-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+      .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+      }
     </style>
   <script type="importmap">
 {
@@ -62,14 +71,13 @@
     "react-dom/": "https://aistudiocdn.com/react-dom@^19.2.0/",
     "react/": "https://aistudiocdn.com/react@^19.2.0/",
     "react": "https://aistudiocdn.com/react@^19.2.0",
-    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6"
+    "react-router-dom": "https://aistudiocdn.com/react-router-dom@^7.9.6",
+    "@google/genai": "https://esm.run/@google/genai"
   }
 }
 </script>
 </head>
   <body>
     <div id="root"></div>
-    <!-- Entrypoint para Vite/React -->
-    <script type="module" src="/index.tsx"></script>
   </body>
 </html>

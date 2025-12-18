@@ -1,14 +1,17 @@
-import React from 'react';
+
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDesign } from '../context/DesignContext';
 import { AppLayout } from '../components/Layout/AppLayout';
 import { StyleChipsBar } from '../components/UI/StyleChipsBar';
 import { ImageUploadArea } from '../components/Upload/ImageUploadArea';
 import { SAMPLE_IMAGES } from '../constants';
+import { imageService } from '../services/geminiService';
 
 const Home: React.FC = () => {
   const navigate = useNavigate();
   const { state, dispatch } = useDesign();
+  const [isGeneratingSample, setIsGeneratingSample] = useState(false);
 
   const handleImageSelect = (file: File) => {
     const url = URL.createObjectURL(file);
@@ -19,94 +22,133 @@ const Home: React.FC = () => {
     dispatch({ type: 'SET_IMAGE', payload: url });
   };
 
+  const handleGenerateAISample = async () => {
+    setIsGeneratingSample(true);
+    try {
+      const imageUrl = await imageService.generateInitialRoom(state.params.roomType);
+      if (imageUrl) {
+        dispatch({ type: 'SET_IMAGE', payload: imageUrl });
+      }
+    } catch (error) {
+      console.error("Erro ao gerar amostra IA", error);
+      alert("Erro ao gerar imagem com IA. Verifique sua chave de API.");
+    } finally {
+      setIsGeneratingSample(false);
+    }
+  };
+
   const handleStart = () => {
     if (state.originalImage) {
       navigate('/studio');
     } else {
-      alert('Por favor, envie ou selecione uma imagem primeiro.');
+      alert("Por favor, envie ou selecione uma imagem primeiro.");
     }
   };
 
   return (
     <AppLayout>
       <div className="min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center p-6 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-indigo-900/20 via-[#0B0F19] to-[#0B0F19]">
-        <div className="max-w-3xl w-full space-y-8 text-center">
-          <div className="space-y-2">
+        
+        <div className="max-w-4xl w-full space-y-8 text-center">
+          
+          <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/10 border border-indigo-500/20 text-indigo-400 text-xs font-bold tracking-wider uppercase">
               <span className="w-2 h-2 rounded-full bg-indigo-400 animate-pulse"></span>
-              Design com IA
+              Design com Inteligência Artificial Real
             </div>
             <h1 className="text-4xl md:text-6xl font-display font-bold text-white leading-tight">
-              Visualize seu espaço em <br />
+              Visualize seu espaço em <br/>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
                 qualquer estilo instantaneamente.
               </span>
             </h1>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
-              Envie uma foto, escolha um estilo e deixe nossa consultora de interiores com IA criar o projeto perfeito para você.
+              Envie uma foto real ou use nossa IA para gerar um ambiente base. Escolha um estilo e veja a mágica acontecer.
             </p>
           </div>
 
           <div className="glass-panel rounded-3xl p-1 border border-white/10 shadow-2xl shadow-indigo-500/10">
             <div className="bg-[#0B0F19]/80 rounded-[20px] p-6 md:p-8 space-y-8">
+              
+              {/* Style Selector */}
               <div className="text-left">
-                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">1. Escolha um estilo</label>
-                <StyleChipsBar
-                  selectedStyle={state.style}
-                  onSelect={style => dispatch({ type: 'SET_STYLE', payload: style })}
+                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">1. Escolha um Estilo</label>
+                <StyleChipsBar 
+                  selectedStyle={state.style} 
+                  onSelect={(style) => dispatch({ type: 'SET_STYLE', payload: style })} 
                   className="-mx-6 px-6 md:mx-0 md:px-0"
                 />
               </div>
 
+              {/* Upload Area */}
               <div className="text-left">
-                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">2. Envie uma foto do ambiente</label>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                  <div className="md:col-span-2">
-                    <ImageUploadArea onImageSelect={handleImageSelect} previewUrl={state.originalImage} />
+                <label className="block text-sm font-medium text-slate-400 mb-3 ml-1">2. Ponto de Partida</label>
+                <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
+                  <div className="md:col-span-8">
+                    <ImageUploadArea 
+                      onImageSelect={handleImageSelect} 
+                      previewUrl={state.originalImage}
+                    />
                   </div>
-                  <div className="space-y-3">
-                    <p className="text-xs text-slate-500 font-medium uppercase">Ou tente um exemplo</p>
+                  <div className="md:col-span-4 space-y-3">
+                    <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">Tente um exemplo</p>
                     <div className="grid grid-cols-2 md:grid-cols-1 gap-2">
-                      {SAMPLE_IMAGES.map(sample => (
-                        <button
+                      {SAMPLE_IMAGES.map((sample) => (
+                        <button 
                           key={sample.label}
                           onClick={() => handleSampleSelect(sample.url)}
-                          className="relative aspect-video rounded-lg overflow-hidden group border border-white/5 hover:border-indigo-500/50 transition-all"
+                          className={`relative aspect-video rounded-lg overflow-hidden group border transition-all ${state.originalImage === sample.url ? 'border-indigo-500 ring-2 ring-indigo-500/20' : 'border-white/5 hover:border-white/20'}`}
                         >
-                          <img
-                            src={sample.url}
-                            alt={sample.label}
-                            referrerPolicy="no-referrer"
-                            onError={e => {
-                              e.currentTarget.src = 'https://placehold.co/800x600?text=Imagem+indisponivel';
-                            }}
-                            className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity"
-                          />
-                          <span className="absolute bottom-1 left-2 text-[10px] font-bold text-white shadow-black drop-shadow-md">
-                            {sample.label}
-                          </span>
+                          <img src={sample.url} alt={sample.label} className="w-full h-full object-cover opacity-60 group-hover:opacity-100 transition-opacity" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/80 to-transparent flex items-end p-2">
+                            <span className="text-[10px] font-bold text-white">{sample.label}</span>
+                          </div>
                         </button>
                       ))}
+                      
+                      {/* Generative Sample Button */}
+                      <button 
+                        onClick={handleGenerateAISample}
+                        disabled={isGeneratingSample}
+                        className="relative aspect-video rounded-lg overflow-hidden group border border-dashed border-indigo-500/40 bg-indigo-500/5 hover:bg-indigo-500/10 transition-all flex flex-col items-center justify-center gap-1"
+                      >
+                        {isGeneratingSample ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <span className="w-4 h-4 border-2 border-indigo-400 border-t-transparent rounded-full animate-spin"></span>
+                            <span className="text-[8px] text-indigo-400 font-bold uppercase">Criando...</span>
+                          </div>
+                        ) : (
+                          <>
+                            <span className="text-xl">✨</span>
+                            <span className="text-[10px] font-bold text-indigo-400 uppercase">Gerar com IA</span>
+                          </>
+                        )}
+                      </button>
                     </div>
                   </div>
                 </div>
               </div>
 
-              <div className="pt-4">
+              {/* CTA */}
+              <div className="pt-4 border-t border-white/5">
                 <button
                   onClick={handleStart}
-                  disabled={!state.originalImage}
-                  className={`w-full md:w-auto px-8 py-4 rounded-xl font-bold text-white text-lg transition-all transform ${
-                    state.originalImage
-                      ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-1'
+                  disabled={!state.originalImage || isGeneratingSample}
+                  className={`
+                    w-full px-8 py-5 rounded-xl font-bold text-white text-lg transition-all transform flex items-center justify-center gap-3
+                    ${state.originalImage && !isGeneratingSample
+                      ? 'bg-gradient-to-r from-indigo-600 via-violet-600 to-indigo-600 bg-[length:200%_auto] hover:bg-right hover:shadow-lg hover:shadow-indigo-500/25 hover:-translate-y-1' 
                       : 'bg-slate-800 text-slate-500 cursor-not-allowed'
-                  }`}
+                    }
+                  `}
                 >
-                  Entrar no Estúdio
+                  {state.originalImage ? 'Continuar para o Estúdio →' : 'Selecione uma imagem para começar'}
                 </button>
               </div>
+
             </div>
           </div>
+
         </div>
       </div>
     </AppLayout>

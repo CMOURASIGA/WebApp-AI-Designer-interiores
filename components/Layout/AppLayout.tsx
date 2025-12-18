@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link, useLocation } from 'react-router-dom';
 
@@ -44,7 +45,7 @@ export const AppLayout: React.FC<AppLayoutProps> = ({ children }) => {
 
       <footer className="border-t border-white/5 py-8 mt-auto">
         <div className="max-w-7xl mx-auto px-4 text-center text-slate-500 text-sm">
-          <p>© 2024 Consultor de Design de Interiores IA. Protótipo Mock.</p>
+          <p>© 2024 AI Consultor de Interiores. Protótipo Mock.</p>
         </div>
       </footer>
     </div>
