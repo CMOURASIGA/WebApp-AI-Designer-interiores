@@ -19,6 +19,13 @@ const Studio: React.FC = () => {
     if (!state.originalImage) navigate('/');
   }, [state.originalImage, navigate]);
 
+  const handleBack = () => {
+    if (confirm("Deseja descartar este projeto e iniciar um novo?")) {
+      dispatch({ type: 'RESET_PROJECT' });
+      navigate('/');
+    }
+  };
+
   const handleGenerate = async () => {
     dispatch({ type: 'SET_GENERATING', payload: true });
     setImageError(null);
@@ -32,7 +39,6 @@ const Studio: React.FC = () => {
       if (newImage === "IMAGE_QUOTA_EXHAUSTED") {
         setImageError("Limite de imagens atingido.");
         
-        // Novo prompt de fallback focado em Ficha Técnica
         const fallbackPrompt = `LIMITE DE IMAGEM ATINGIDO. Gere agora uma FICHA TÉCNICA DETALHADA para o estilo ${state.style}. FOCO: Materiais das superfícies, tipos de tecidos, layout técnico do mobiliário e temperatura de cor da iluminação. Seja sucinto e organizado em tópicos.`;
         
         const textFallback = await chatService.sendMessage(state.chatHistory, fallbackPrompt, { 
@@ -64,10 +70,22 @@ const Studio: React.FC = () => {
   return (
     <AppLayout>
       <div className="h-[calc(100vh-4rem)] flex flex-col overflow-hidden">
-        <div className="bg-[#0B0F19] border-b border-white/5 shadow-md z-10">
+        <div className="bg-[#0B0F19] border-b border-white/5 shadow-md z-10 flex items-center pr-4">
+          <button 
+            onClick={handleBack}
+            className="flex items-center gap-2 px-6 py-4 text-slate-400 hover:text-white border-r border-white/5 transition-colors group"
+            title="Voltar e Iniciar Novo Projeto"
+          >
+            <svg className="w-5 h-5 group-hover:-translate-x-1 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+            </svg>
+            <span className="text-xs font-bold uppercase tracking-widest hidden md:inline">Novo Projeto</span>
+          </button>
+          
           <StyleChipsBar 
              selectedStyle={state.style} 
              onSelect={(style) => dispatch({ type: 'SET_STYLE', payload: style })} 
+             className="flex-1"
           />
         </div>
 
