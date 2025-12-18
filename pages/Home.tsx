@@ -63,7 +63,7 @@ const Home: React.FC = () => {
             <h1 className="text-4xl md:text-6xl font-display font-bold text-white leading-tight">
               Transforme seu espaço <br/>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-400">
-                com o poder do Gemini.
+                com a ajuda de uma IA
               </span>
             </h1>
             <p className="text-slate-400 text-lg max-w-2xl mx-auto">
