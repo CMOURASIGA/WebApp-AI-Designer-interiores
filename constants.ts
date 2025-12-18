@@ -29,9 +29,18 @@ export const BUDGET_OPTIONS = ['Baixo', 'Médio', 'Alto'];
 export const BOLDNESS_OPTIONS = ['Discreto', 'Equilibrado', 'Ousado'];
 
 export const SAMPLE_IMAGES = [
-  { label: 'Sala de Estar', url: 'https://images.unsplash.com/photo-1583847268964-b28dc8f51f92?q=80&w=800&auto=format&fit=crop' },
-  { label: 'Quarto Moderno', url: 'https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?q=80&w=800&auto=format&fit=crop' },
-  { label: 'Cozinha Gourmet', url: 'https://images.unsplash.com/photo-1556911223-e1534ff039f2?q=80&w=800&auto=format&fit=crop' },
+  { 
+    label: 'Sala de Estar', 
+    url: 'https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?auto=format&fit=crop&w=1000&q=80' 
+  },
+  { 
+    label: 'Quarto Moderno', 
+    url: 'https://images.unsplash.com/photo-1616594192358-af75a1cdb389?auto=format&fit=crop&w=1000&q=80' 
+  },
+  { 
+    label: 'Cozinha Gourmet', 
+    url: 'https://images.unsplash.com/photo-1556911223-e1534ff039f2?auto=format&fit=crop&w=1000&q=80' 
+  },
 ];
 
 export const COLOR_PALETTES = [

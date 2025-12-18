@@ -88,11 +88,9 @@ export const designService = {
 };
 
 export const imageService = {
-  // Gera um ambiente inicial do zero baseado em um prompt
   generateInitialRoom: async (roomType: string): Promise<string> => {
     const ai = getAI();
-    const prompt = `Uma fotografia fotorrealista de alta qualidade de uma ${roomType} vazia ou com mobília básica, 
-    iluminação natural, estilo moderno neutro, pronta para ser decorada. Ângulo amplo, arquitetura limpa.`;
+    const prompt = `FOTOGRAFIA PROFISSIONAL: Um ambiente de ${roomType} vazio ou com mobília minimalista, iluminação natural suave entrando pelas janelas, arquitetura moderna com paredes brancas ou neutras, piso de madeira ou concreto. Alta definição, 8k, estilo 'página em branco' pronta para design de interiores.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
@@ -118,11 +116,10 @@ export const imageService = {
     const ai = getAI();
     const { data, mimeType } = await urlToBase64(originalUrl);
     
-    const prompt = `Redesenhe este ambiente seguindo estritamente o estilo ${style}. 
-    Mantenha a estrutura arquitetônica (paredes, janelas, portas) mas altere todo o mobiliário, 
-    decoração, iluminação e acabamentos. Use a paleta de cores: ${params.colors.join(', ')}. 
-    O nível de decoração deve ser ${params.boldness}. 
-    A imagem final deve ser fotorrealista, de alta qualidade e digna de uma revista de arquitetura.`;
+    const prompt = `TRANSFORMAÇÃO DE INTERIORES: Redesenhe este ambiente exatamente no estilo ${style}. 
+    Mantenha a geometria estrutural do espaço, mas substitua toda a mobília, cores e iluminação. 
+    Use a paleta: ${params.colors.join(', ')}. Nível de detalhamento: ${params.boldness}. 
+    Resultado fotorrealista de alta qualidade, iluminação cinematográfica, renderização profissional.`;
 
     const response = await ai.models.generateContent({
       model: 'gemini-2.5-flash-image',
